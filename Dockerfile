@@ -1,27 +1,23 @@
 FROM python:3.9-bullseye
 
-# Fix: https://github.com/hadolint/hadolint/wiki/DL4006
-# Fix: https://github.com/koalaman/shellcheck/wiki/SC3014
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
 USER root
 
-# Julia installation
-# Default values can be overridden at build time
-# (ARGS are in lower case to distinguish them from ENV)
-# Check https://julialang.org/downloads/
+# General dependencies
+RUN apt-get update && apt-get install -y \
+  zip unzip \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Juia installation 
+# from: https://github.com/jupyter/docker-stacks/blob/main/datascience-notebook/Dockerfile
+# - Copyright (c) 2001-2015, IPython Development Team
+# - Copyright (c) 2015-, Jupyter Development Team
 ARG julia_version="1.8.5"
-
-
-# Julia dependencies
-# install Julia packages in /opt/julia instead of ${HOME}
 ENV JULIA_DEPOT_PATH=/opt/julia \
   JULIA_PKGDIR=/opt/julia \
   JULIA_VERSION="${julia_version}"
-
 WORKDIR /tmp
-
-# hadolint ignore=SC2046
 RUN set -x && \
   julia_arch=$(uname -m) && \
   julia_short_arch="${julia_arch}" && \
@@ -36,6 +32,9 @@ RUN set -x && \
   rm "${julia_installer}" && \
   ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
 
+# PyCall installation
+RUN julia -e 'using Pkg; Pkg.add("PyCall")'
 
-
-
+# Rust installation
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > install-rust.sh
+RUN sh install-rust.sh -y
