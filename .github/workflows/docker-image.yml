@@ -25,4 +25,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: sudame/urn-model-environment:latest
+          tags: ghcr.io/sudame/urn-model-environment:latest
