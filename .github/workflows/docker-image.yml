@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Authenticate Docker
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u sudame --password-stdin
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag ghcr.io/sudame/urn-model-environment
       - name: Push the Docker image
